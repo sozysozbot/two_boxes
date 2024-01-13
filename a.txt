@@ -1,0 +1,9 @@
+v: ['A', 'B'], ans: 2
+v: ['A', 'B', 'A', 'B'], ans: 5
+v: ['A', 'B', 'A', 'B', 'A', 'B'], ans: 14
+v: ['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B'], ans: 41
+v: ['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B'], ans: 124
+collision:
+  RRLRRLRLLRLL
+  LLRLLRLRRLRR
+v: ['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B'], ans: 382

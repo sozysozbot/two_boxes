@@ -2,62 +2,79 @@ type Ball = char;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 struct TwoBoxes {
-    u: Vec<Ball>,
-    v: Vec<Ball>,
+    left: Vec<Ball>,
+    right: Vec<Ball>,
     limit: usize,
 }
 
 impl TwoBoxes {
     pub fn new(limit: usize) -> TwoBoxes {
         TwoBoxes {
-            u: vec![],
-            v: vec![],
+            left: vec![],
+            right: vec![],
             limit,
         }
     }
-    fn push(&mut self, k: Ball, is_u: bool) -> Option<()> {
-        if is_u {
-            if self.u.len() == self.limit {
+    fn push(&mut self, k: Ball, is_left: bool) -> Option<()> {
+        if is_left {
+            if self.left.len() == self.limit {
                 None
             } else {
-                self.u.push(k);
+                self.left.push(k);
                 Some(())
             }
         } else {
-            if self.v.len() == self.limit {
+            if self.right.len() == self.limit {
                 None
             } else {
-                self.v.push(k);
+                self.right.push(k);
                 Some(())
             }
         }
     }
     pub fn push_all(s: TwoBoxes, k: Ball) -> Vec<TwoBoxes> {
         let mut ans = vec![];
-        let mut try_u = s.clone();
-        if let Some(()) = try_u.push(k, true) {
-            ans.push(try_u);
+        let mut try_left = s.clone();
+        if let Some(()) = try_left.push(k, true) {
+            ans.push(try_left);
         }
-        let mut try_v = s.clone();
+        let mut try_right = s.clone();
 
-        if let Some(()) = try_v.push(k, false) {
-            ans.push(try_v);
+        if let Some(()) = try_right.push(k, false) {
+            ans.push(try_right);
+        }
+        ans
+    }
+
+    pub fn push_all_with_operations(
+        (key, tb): (String, TwoBoxes),
+        k: Ball,
+    ) -> Vec<(String, TwoBoxes)> {
+        let mut ans = vec![];
+        let mut try_left = tb.clone();
+        if let Some(()) = try_left.push(k, true) {
+            ans.push((format!("{key}L"), try_left));
+        }
+        let mut try_right = tb.clone();
+
+        if let Some(()) = try_right.push(k, false) {
+            ans.push((format!("{key}R"), try_right));
         }
         ans
     }
 }
 
-use std::collections::BTreeSet;
+use std::collections::BTreeMap;
 
 fn main() {
-    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C']);
-    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
+    //  detect_conflict(&['A', 'B', 'C', 'A', 'B', 'C']);
+    //  detect_conflict(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
 
     let mut vec = vec![];
-    for _ in 0..20 {
+    for _ in 0..=5 {
         vec.push('A');
         vec.push('B');
-        count_how_many(&vec);
+        detect_conflict(&vec);
     }
     /*
     main2(&['A', 'B']);
@@ -71,16 +88,28 @@ fn main() {
     ]); */
 }
 
-fn count_how_many(v: &[Ball]) {
+fn detect_conflict(v: &[Ball]) {
     let limit = v.len() / 2;
-    let mut cooking = BTreeSet::new();
-    cooking.insert(TwoBoxes::new(limit));
+    let mut cooking = BTreeMap::new();
+    cooking.insert(TwoBoxes::new(limit), String::new());
 
     for b in v {
-        cooking = cooking
+        let iter = cooking
             .into_iter()
-            .flat_map(|tb| TwoBoxes::push_all(tb, *b))
-            .collect::<BTreeSet<TwoBoxes>>();
+            .flat_map(|(tb, operations)| TwoBoxes::push_all_with_operations((operations, tb), *b));
+
+        cooking = BTreeMap::new();
+        for (operation, tb) in iter {
+            if let std::collections::btree_map::Entry::Vacant(e) = cooking.entry(tb.clone()) {
+                e.insert(operation);
+            } else {
+                let s1 = cooking.get(&tb).unwrap();
+
+                if !s1.contains("LLRR") && !operation.contains("LLRR") {
+                    println!("collision:\n  {}\n  {}", s1, operation);
+                }
+            }
+        }
     }
 
     println!("v: {:?}, ans: {}", v, cooking.len())

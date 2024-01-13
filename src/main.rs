@@ -66,32 +66,45 @@ impl TwoBoxes {
 
 use std::collections::BTreeMap;
 
-fn main() {
-    //  detect_conflict(&['A', 'B', 'C', 'A', 'B', 'C']);
-    //  detect_conflict(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
+use std::collections::BTreeSet;
 
-    let mut vec = vec![];
-    for _ in 0..=5 {
-        vec.push('A');
-        vec.push('B');
-        detect_conflict(&vec);
+fn count_how_many(v: &[Ball]) {
+    let limit = v.len() / 2;
+    let mut cooking = BTreeSet::new();
+    cooking.insert(TwoBoxes::new(limit));
+
+    for b in v {
+        cooking = cooking
+            .into_iter()
+            .flat_map(|tb| TwoBoxes::push_all(tb, *b))
+            .collect::<BTreeSet<TwoBoxes>>();
     }
-    /*
-    main2(&['A', 'B']);
-    main2(&['A', 'B', 'A', 'B']);
-    main2(&['A', 'B', 'A', 'B', 'A', 'B']);
-    main2(&['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B']);
-    main2(&['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B']);
-    main2(&['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B']);
-    main2(&[
-        'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B',
-    ]); */
+
+    println!("v: {:?}, ans: {}", v, cooking.len())
+}
+
+fn main() {
+    println!("||| Counting |||");
+    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C']);
+    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
+
+    for i in 1..=10 {
+        count_how_many(&['A', 'B'].repeat(i));
+    }
+
+    println!();
+    println!("------------------------------");
+    println!("||| Looking for collisions |||");
+    println!("------------------------------");
+    detect_conflict(&['A', 'B'].repeat(8));
 }
 
 fn detect_conflict(v: &[Ball]) {
     let limit = v.len() / 2;
     let mut cooking = BTreeMap::new();
     cooking.insert(TwoBoxes::new(limit), String::new());
+
+    let mut nontrivial_collisions: Vec<(String, String)> = vec![];
 
     for b in v {
         let iter = cooking
@@ -105,12 +118,23 @@ fn detect_conflict(v: &[Ball]) {
             } else {
                 let s1 = cooking.get(&tb).unwrap();
 
-                if !s1.contains("LLRR") && !operation.contains("LLRR") {
-                    println!("collision:\n  {}\n  {}", s1, operation);
+                let mut already_known = false;
+
+                for (u, v) in &nontrivial_collisions {
+                    if s1.contains(u)
+                        || operation.contains(u)
+                        || s1.contains(v)
+                        || operation.contains(v)
+                    {
+                        already_known = true;
+                    }
+                }
+
+                if !already_known {
+                    println!("nontrivial collision:\n  {}\n  {}", s1, operation);
+                    nontrivial_collisions.push((s1.clone(), operation.clone()))
                 }
             }
         }
     }
-
-    println!("v: {:?}, ans: {}", v, cooking.len())
 }

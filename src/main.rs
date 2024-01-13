@@ -50,14 +50,14 @@ impl TwoBoxes {
 use std::collections::BTreeSet;
 
 fn main() {
-    main2(&['A', 'B', 'C', 'A', 'B', 'C']);
-    main2(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
+    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C']);
+    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
 
     let mut vec = vec![];
     for _ in 0..20 {
         vec.push('A');
         vec.push('B');
-        main2(&vec);
+        count_how_many(&vec);
     }
     /*
     main2(&['A', 'B']);
@@ -71,7 +71,7 @@ fn main() {
     ]); */
 }
 
-fn main2(v: &[Ball]) {
+fn count_how_many(v: &[Ball]) {
     let limit = v.len() / 2;
     let mut cooking = BTreeSet::new();
     cooking.insert(TwoBoxes::new(limit));

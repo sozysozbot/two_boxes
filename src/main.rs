@@ -1,3 +1,4 @@
+use std::collections::{BTreeMap, BTreeSet};
 type Ball = char;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
@@ -15,33 +16,32 @@ impl TwoBoxes {
             limit,
         }
     }
-    fn push(&mut self, k: Ball, is_left: bool) -> Option<()> {
-        if is_left {
-            if self.left.len() == self.limit {
-                None
-            } else {
-                self.left.push(k);
-                Some(())
-            }
+
+    fn try_left(mut self, k: Ball) -> Option<Self> {
+        if self.left.len() == self.limit {
+            None
         } else {
-            if self.right.len() == self.limit {
-                None
-            } else {
-                self.right.push(k);
-                Some(())
-            }
+            self.left.push(k);
+            Some(self)
         }
     }
+
+    fn try_right(mut self, k: Ball) -> Option<Self> {
+        if self.right.len() == self.limit {
+            None
+        } else {
+            self.right.push(k);
+            Some(self)
+        }
+    }
+
     pub fn push_all(s: TwoBoxes, k: Ball) -> Vec<TwoBoxes> {
         let mut ans = vec![];
-        let mut try_left = s.clone();
-        if let Some(()) = try_left.push(k, true) {
-            ans.push(try_left);
+        if let Some(left) = s.clone().try_left(k) {
+            ans.push(left);
         }
-        let mut try_right = s.clone();
-
-        if let Some(()) = try_right.push(k, false) {
-            ans.push(try_right);
+        if let Some(right) = s.try_right(k) {
+            ans.push(right);
         }
         ans
     }
@@ -51,22 +51,16 @@ impl TwoBoxes {
         k: Ball,
     ) -> Vec<(String, TwoBoxes)> {
         let mut ans = vec![];
-        let mut try_left = tb.clone();
-        if let Some(()) = try_left.push(k, true) {
-            ans.push((format!("{key}L"), try_left));
+        if let Some(left) = tb.clone().try_left(k) {
+            ans.push((format!("{key}L"), left));
         }
-        let mut try_right = tb.clone();
 
-        if let Some(()) = try_right.push(k, false) {
-            ans.push((format!("{key}R"), try_right));
+        if let Some(right) = tb.clone().try_right(k) {
+            ans.push((format!("{key}R"), right));
         }
         ans
     }
 }
-
-use std::collections::BTreeMap;
-
-use std::collections::BTreeSet;
 
 fn count_how_many(v: &[Ball]) {
     let limit = v.len() / 2;

@@ -62,8 +62,17 @@ impl TwoBoxes {
     }
 }
 
-fn count_how_many(v: &[Ball]) {
+fn count_how_many_with_limit(v: &[Ball]) {
     let limit = v.len() / 2;
+    count_how_many(v, limit)
+}
+
+fn count_how_many_without_limit(v: &[Ball]) {
+    let limit = v.len();
+    count_how_many(v, limit)
+}
+
+fn count_how_many(v: &[Ball], limit: usize) {
     let mut cooking = BTreeSet::new();
     cooking.insert(TwoBoxes::new(limit));
 
@@ -74,16 +83,22 @@ fn count_how_many(v: &[Ball]) {
             .collect::<BTreeSet<TwoBoxes>>();
     }
 
-    println!("v: {:?}, ans: {}", v, cooking.len())
+    println!("limit: {}, v: {:?}, ans: {}", limit, v, cooking.len())
 }
 
 fn main() {
     println!("||| Counting |||");
-    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C']);
-    count_how_many(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
+    count_how_many_with_limit(&['A', 'B', 'C', 'A', 'B', 'C']);
+    count_how_many_with_limit(&['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']);
 
+    println!("||| capped at half |||");
     for i in 1..=10 {
-        count_how_many(&['A', 'B'].repeat(i));
+        count_how_many_with_limit(&['A', 'B'].repeat(i));
+    }
+
+    println!("||| not capped at half |||");
+    for i in 1..=20 {
+        count_how_many_without_limit(&['A', 'B'].repeat(i));
     }
 
     println!();
